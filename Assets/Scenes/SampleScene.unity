@@ -1059,8 +1059,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -187.50148}
-  m_SizeDelta: {x: 530.6, y: 128.1}
+  m_AnchoredPosition: {x: 0, y: -4}
+  m_SizeDelta: {x: 530.6, y: 90.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &706311066
 MonoBehaviour:
@@ -1077,21 +1077,21 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: 12.09, y: 0.9, z: 12.14, w: 8.37}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: c084bf65a3a979d41beb05a03060987e, type: 3}
-    m_FontSize: 40
+    m_FontSize: 29
     m_FontStyle: 1
-    m_BestFit: 1
+    m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 40
     m_Alignment: 1
     m_AlignByGeometry: 0
-    m_RichText: 1
+    m_RichText: 0
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
@@ -1483,8 +1483,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a64828447182c7c448eca2bd6bbee568, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ocrUrl: https://gzzn2em0hg.apigw.ntruss.com/custom/v1/48677/696f36728d33cbfc35763bf22efd31333016cca5845a5bd8e8453565d7aa3c2b/infer
-  secretKey: cU9QVVlTSVpaWmpCam5uVVR6b2tqc1pWQnNIT0paY0c=
+  koreanOcrUrl: https://gzzn2em0hg.apigw.ntruss.com/custom/v1/48678/a70305fe4a43246ac693376e83817108f981bf32de6a6a074ef52b93870f9328/general
+  koreanSecretKey: VWhrRWVreUFJb2h1V2lEZ3J5SEFKT2dhdklCbmZNREM=
+  japaneseOcrUrl: https://gzzn2em0hg.apigw.ntruss.com/custom/v1/48677/696f36728d33cbfc35763bf22efd31333016cca5845a5bd8e8453565d7aa3c2b/infer
+  japaneseSecretKey: cU9QVVlTSVpaWmpCam5uVVR6b2tqc1pWQnNIT0paY0c=
 --- !u!4 &1103514907
 Transform:
   m_ObjectHideFlags: 0
@@ -1494,7 +1496,7 @@ Transform:
   m_GameObject: {fileID: 1103514905}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 872.2457, y: 573.5899, z: -144.87585}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1609,7 +1611,7 @@ Transform:
   m_GameObject: {fileID: 1170322811}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 872.2457, y: 573.5899, z: -144.87585}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1647,9 +1649,9 @@ MonoBehaviour:
   cameraCapture: {fileID: 769071557}
   ocrClient: {fileID: 1103514906}
   translatorClient: {fileID: 1170322812}
-  languageDropdown: {fileID: 543722714}
   translateButton: {fileID: 72527441}
   resultText: {fileID: 706311066}
+  languageDropdown: {fileID: 543722714}
   targetLang: ko
 --- !u!4 &1283033476
 Transform:
@@ -1660,7 +1662,7 @@ Transform:
   m_GameObject: {fileID: 1283033474}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 872.2457, y: 573.5899, z: -144.87585}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

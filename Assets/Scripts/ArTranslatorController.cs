@@ -1,28 +1,24 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class ArTranslatorController : MonoBehaviour
 {
-    [Header("참조")]
     public ArCameraCapture cameraCapture;
     public OcrClient ocrClient;
     public TranslatorClient translatorClient;
-    public Dropdown languageDropdown;
 
-    [Header("UI")]
     public Button translateButton;
     public Text resultText;
+    public Dropdown languageDropdown;
 
-    public string targetLang = "ko";        // 바꿀거
-
+    public string targetLang = "ko";
     bool isBusy = false;
 
     void Start()
     {
-        if (translateButton != null)
-            translateButton.onClick.AddListener(OnClickTranslate);
+        translateButton.onClick.AddListener(OnClickTranslate);
     }
 
     void OnClickTranslate()
@@ -31,82 +27,68 @@ public class ArTranslatorController : MonoBehaviour
             StartCoroutine(TranslateFlow());
     }
 
-    string GetSourceLangCode()
-    {
-        if (languageDropdown == null)
-            return "en";
-
-        switch (languageDropdown.value)
-        {
-            case 0:
-                return "en";
-            case 1:
-                return "ja";
-            default:
-                return "en";
-        }
-    }
-
     IEnumerator TranslateFlow()
     {
         isBusy = true;
 
-        if (resultText != null)
-            resultText.text = "카메라 캡처 중...";
+        // 캡처
+        if (resultText) resultText.text = "캡처 중...";
 
-        // 카메라에서 캡처
-        Texture2D captured = null;
-        yield return StartCoroutine(cameraCapture.CaptureCenterBox(tex => captured = tex));
+        Texture2D tex = null;
 
-        if (captured == null)
+        yield return StartCoroutine(
+            cameraCapture.CaptureCenterBox(t => tex = t)
+        );
+
+        if (tex == null)
         {
-            if (resultText != null)
-                resultText.text = "캡처 실패";
+            if (resultText) resultText.text = "캡처 실패";
             isBusy = false;
             yield break;
         }
 
-        // OCR
-        if (resultText != null)
-            resultText.text = "텍스트 인식 중...";
+        // 언어/도메인 결정
+        string srcLang;
+        OcrClient.OcrDomainType domainType;
 
+        if (languageDropdown.value == 0)
+        {
+            srcLang = "en";
+            domainType = OcrClient.OcrDomainType.Korean;
+        }
+        else
+        {
+            srcLang = "ja";
+            domainType = OcrClient.OcrDomainType.Japanese;
+        }
+
+        // 3) OCR
+        if (resultText) resultText.text = "텍스트 인식 중...";
         string recognizedText = null;
+
         yield return StartCoroutine(
-            ocrClient.RequestOcr(captured, t => recognizedText = t)
+            ocrClient.RequestOcr(tex, domainType, t => recognizedText = t)
         );
 
         if (string.IsNullOrEmpty(recognizedText))
         {
-            if (resultText != null)
-                resultText.text = "텍스트 인식 실패";
+            if (resultText) resultText.text = "텍스트 인식 실패";
             isBusy = false;
             yield break;
         }
 
-        Debug.Log("OCR 결과: " + recognizedText);
-
-        // 번역
-        if (resultText != null)
-            resultText.text = "번역 중...";
-
-        string translatedText = null;
-        string srcLang = GetSourceLangCode();
+        // 4) 번역
+        if (resultText) resultText.text = "번역 중...";
+        string translated = null;
 
         yield return StartCoroutine(
-            translatorClient.RequestTranslate(recognizedText, srcLang, targetLang, t => translatedText = t)
+            translatorClient.RequestTranslate(recognizedText, srcLang, targetLang, t => translated = t)
         );
 
-        if (string.IsNullOrEmpty(translatedText))
-        {
-            if (resultText != null)
-                resultText.text = "번역 실패 (콘솔 확인)";
-            isBusy = false;
-            yield break;
-        }
-
-        // 결과
-        if (resultText != null)
-            resultText.text = translatedText;
+        if (string.IsNullOrEmpty(translated))
+            resultText.text = "번역 실패";
+        else
+            resultText.text = translated;
 
         isBusy = false;
     }

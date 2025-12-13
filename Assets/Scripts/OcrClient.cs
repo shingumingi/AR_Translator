@@ -1,14 +1,25 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
 public class OcrClient : MonoBehaviour
 {
-    [Header("CLOVA OCR 설정")]
-    public string ocrUrl;
-    public string secretKey;
+    public enum OcrDomainType
+    {
+        Korean,
+        Japanese
+    }
+
+    [Header("Korean / English OCR 도메인 (지원 언어: 한국어)")]
+    public string koreanOcrUrl;
+    public string koreanSecretKey;
+
+    [Header("Japanese OCR 도메인 (지원 언어: 일본어)")]
+    public string japaneseOcrUrl;
+    public string japaneseSecretKey;
 
     [Serializable]
     private class OcrImage
@@ -45,7 +56,7 @@ public class OcrClient : MonoBehaviour
         public OcrImageResult[] images;
     }
 
-    public IEnumerator RequestOcr(Texture2D image, Action<string> onResult)
+    public IEnumerator RequestOcr(Texture2D image, OcrDomainType domainType, Action<string> onResult)
     {
         if (image == null)
         {
@@ -53,17 +64,31 @@ public class OcrClient : MonoBehaviour
             yield break;
         }
 
-        if (string.IsNullOrEmpty(ocrUrl) || string.IsNullOrEmpty(secretKey))
+        string url = null;
+        string key = null;
+
+        switch (domainType)
+        {
+            case OcrDomainType.Korean:
+                url = koreanOcrUrl;
+                key = koreanSecretKey;
+                break;
+            case OcrDomainType.Japanese:
+                url = japaneseOcrUrl;
+                key = japaneseSecretKey;
+                break;
+        }
+
+        if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(key))
         {
             onResult?.Invoke(null);
             yield break;
         }
 
-        // 이미지 -> JPG -> 문자열
+        // 2) 이미지 → JPG → Base64
         byte[] imageBytes = image.EncodeToJPG(90);
         string imageBase64 = Convert.ToBase64String(imageBytes);
 
-        // 요청 바디
         var req = new OcrRequest
         {
             version = "V2",
@@ -83,15 +108,14 @@ public class OcrClient : MonoBehaviour
         string json = JsonUtility.ToJson(req);
         byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
 
-        using (UnityWebRequest uwr = new UnityWebRequest(ocrUrl, "POST"))
+        using (UnityWebRequest uwr = new UnityWebRequest(url, "POST"))
         {
             uwr.uploadHandler = new UploadHandlerRaw(bodyRaw);
             uwr.downloadHandler = new DownloadHandlerBuffer();
 
             uwr.SetRequestHeader("Content-Type", "application/json; charset=UTF-8");
-            uwr.SetRequestHeader("X-OCR-SECRET", secretKey);
+            uwr.SetRequestHeader("X-OCR-SECRET", key);
 
-            // 요청
             yield return uwr.SendWebRequest();
 
             if (uwr.result != UnityWebRequest.Result.Success)
@@ -125,8 +149,7 @@ public class OcrClient : MonoBehaviour
                 if (field == null || string.IsNullOrEmpty(field.inferText))
                     continue;
 
-                if (sb.Length > 0)
-                    sb.Append(" ");
+                if (sb.Length > 0) sb.Append(" ");
                 sb.Append(field.inferText);
             }
 
