@@ -9,13 +9,12 @@ public class ArTranslatorController : MonoBehaviour
     public ArCameraCapture cameraCapture;
     public OcrClient ocrClient;
     public TranslatorClient translatorClient;
+    public Dropdown languageDropdown;
 
     [Header("UI")]
     public Button translateButton;
     public Text resultText;
 
-    [Header("언어 설정")]
-    public string sourceLang = "en";        // 바뀔거
     public string targetLang = "ko";        // 바꿀거
 
     bool isBusy = false;
@@ -30,6 +29,22 @@ public class ArTranslatorController : MonoBehaviour
     {
         if (!isBusy)
             StartCoroutine(TranslateFlow());
+    }
+
+    string GetSourceLangCode()
+    {
+        if (languageDropdown == null)
+            return "en";
+
+        switch (languageDropdown.value)
+        {
+            case 0:
+                return "en";
+            case 1:
+                return "ja";
+            default:
+                return "en";
+        }
     }
 
     IEnumerator TranslateFlow()
@@ -75,8 +90,10 @@ public class ArTranslatorController : MonoBehaviour
             resultText.text = "번역 중...";
 
         string translatedText = null;
+        string srcLang = GetSourceLangCode();
+
         yield return StartCoroutine(
-            translatorClient.RequestTranslate(recognizedText, sourceLang, targetLang, t => translatedText = t)
+            translatorClient.RequestTranslate(recognizedText, srcLang, targetLang, t => translatedText = t)
         );
 
         if (string.IsNullOrEmpty(translatedText))
