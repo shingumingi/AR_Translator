@@ -1,17 +1,22 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MainWaiting : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    // 버튼의 OnClick 이벤트에 연결할 함수
+    public void ChangeSceneWithDelay()
     {
-        StartCoroutine(Waiting());
+        StartCoroutine(LoadSceneAfterDelay());
     }
 
-    IEnumerator Waiting()
+    // 0.2초 대기 후 씬을 로드하는 코루틴
+    IEnumerator LoadSceneAfterDelay()
     {
-        yield return new WaitForSeconds(3f);
+        // 0.2초 기다림
+        yield return new WaitForSeconds(0.2f);
+
+        // "SampleScene"으로 전환
+        SceneManager.LoadScene("SampleScene");
     }
 }
