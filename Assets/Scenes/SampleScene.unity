@@ -979,9 +979,9 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: "\uC601\uC5B4"
+    - m_Text: "\uC601\uC5B4 \u2192 \uD55C\uAD6D\uC5B4"
       m_Image: {fileID: 0}
-    - m_Text: "\uC77C\uBCF8\uC5B4"
+    - m_Text: "\uD55C\uAD6D\uC5B4 \u2192 \uC601\uC5B4"
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1169,7 +1169,7 @@ RectTransform:
   m_GameObject: {fileID: 687865930}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.413687, y: 0.413687, z: 0.413687}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 543722713}
@@ -1201,18 +1201,18 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: c084bf65a3a979d41beb05a03060987e, type: 3}
-    m_FontSize: 14
+    m_FontSize: 38
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
-    m_Alignment: 3
+    m_MaxSize: 57
+    m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\uC601\uC5B4"
+  m_Text: "\uC601\uC5B4 \u2192 \uD55C\uAD6D\uC5B4"
 --- !u!222 &687865933
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1259,7 +1259,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 2}
-  m_SizeDelta: {x: 0, y: 70.5148}
+  m_SizeDelta: {x: 0, y: 64.621}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &691904713
 MonoBehaviour:
@@ -1363,8 +1363,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -87}
-  m_SizeDelta: {x: 530.6, y: 90.1}
+  m_AnchoredPosition: {x: 0, y: -147}
+  m_SizeDelta: {x: 462.03, y: 90.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &706311066
 MonoBehaviour:
@@ -2179,10 +2179,8 @@ MonoBehaviour:
   cameraCapture: {fileID: 769071557}
   ocrClient: {fileID: 1103514906}
   translatorClient: {fileID: 1170322812}
-  translateButton: {fileID: 72527441}
-  resultText: {fileID: 706311066}
   languageDropdown: {fileID: 543722714}
-  targetLang: ko
+  resultText: {fileID: 706311066}
 --- !u!4 &1283033476
 Transform:
   m_ObjectHideFlags: 0

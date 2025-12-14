@@ -1,94 +1,103 @@
+using System;
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using System.Collections;
 
 public class ArTranslatorController : MonoBehaviour
 {
+    [Header("참조")]
     public ArCameraCapture cameraCapture;
     public OcrClient ocrClient;
     public TranslatorClient translatorClient;
 
-    public Button translateButton;
+    [Header("UI")]
+    public Dropdown languageDropdown;   // 0: 영어, 1: 한국어
     public Text resultText;
-    public Dropdown languageDropdown;
 
-    public string targetLang = "ko";
     bool isBusy = false;
 
-    void Start()
+    // 번역 버튼에서 이 함수 호출하게 연결해 두기
+    public void OnClickTranslate()
     {
-        translateButton.onClick.AddListener(OnClickTranslate);
-    }
-
-    void OnClickTranslate()
-    {
-        if (!isBusy)
-            StartCoroutine(TranslateFlow());
+        if (isBusy) return;
+        StartCoroutine(TranslateFlow());
     }
 
     IEnumerator TranslateFlow()
     {
         isBusy = true;
+        if (resultText != null) resultText.text = "텍스트 인식 중...";
 
-        // 캡처
-        if (resultText) resultText.text = "캡처 중...";
-
+        // 1) 카메라 캡처 (코루틴 + 콜백)
         Texture2D tex = null;
 
+        // 캡처가 끝나면 콜백에서 tex에 넣어줌
         yield return StartCoroutine(
             cameraCapture.CaptureCenterBox(t => tex = t)
         );
 
         if (tex == null)
         {
-            if (resultText) resultText.text = "캡처 실패";
+            if (resultText != null) resultText.text = "캡처 실패";
             isBusy = false;
             yield break;
         }
 
-        // 언어/도메인 결정
+        // --- 여기 아래로는 아까 만든 언어/번역 방향 결정 코드 그대로 ---
+        // 2) 언어 / 번역 방향 결정
         string srcLang;
-        OcrClient.OcrDomainType domainType;
+        string targetLang;
 
-        if (languageDropdown.value == 0)
+        if (languageDropdown.value == 0)      // 영어 선택
         {
             srcLang = "en";
-            domainType = OcrClient.OcrDomainType.Korean;
+            targetLang = "ko";
         }
-        else
+        else                                  // 한국어 선택
         {
-            srcLang = "ja";
-            domainType = OcrClient.OcrDomainType.Japanese;
+            srcLang = "ko";
+            targetLang = "en";
         }
 
         // 3) OCR
-        if (resultText) resultText.text = "텍스트 인식 중...";
         string recognizedText = null;
-
         yield return StartCoroutine(
-            ocrClient.RequestOcr(tex, domainType, t => recognizedText = t)
+            ocrClient.RequestOcr(
+                tex,
+                OcrClient.OcrDomainType.Korean,
+                t => recognizedText = t
+            )
         );
 
         if (string.IsNullOrEmpty(recognizedText))
         {
-            if (resultText) resultText.text = "텍스트 인식 실패";
+            if (resultText != null) resultText.text = "텍스트 인식 실패";
             isBusy = false;
             yield break;
         }
 
         // 4) 번역
-        if (resultText) resultText.text = "번역 중...";
-        string translated = null;
+        if (resultText != null) resultText.text = "번역 중...";
 
+        string translated = null;
         yield return StartCoroutine(
-            translatorClient.RequestTranslate(recognizedText, srcLang, targetLang, t => translated = t)
+            translatorClient.RequestTranslate(
+                recognizedText,
+                srcLang,
+                targetLang,
+                t => translated = t
+            )
         );
 
         if (string.IsNullOrEmpty(translated))
-            resultText.text = "번역 실패";
+        {
+            if (resultText != null) resultText.text = "번역 실패";
+        }
         else
-            resultText.text = translated;
+        {
+            if (resultText != null) resultText.text = translated;
+        }
 
         isBusy = false;
     }
