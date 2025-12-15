@@ -1,78 +1,72 @@
 using System;
 using System.Collections;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.XR.ARFoundation;
-using UnityEngine.XR.ARSubsystems;
 
 public class ArCameraCapture : MonoBehaviour
 {
-    [SerializeField] ARCameraManager cameraManager;
-    [SerializeField] RectTransform centerBox;
+    [Header("캡쳐할 UI 박스 (Canvas 안의 CenterBox)")]
+    public RectTransform centerBox;
+
+    [Header("화면을 렌더하는 카메라 (AR 메인 카메라)")]
+    public Camera captureCamera;
 
     public IEnumerator CaptureCenterBox(Action<Texture2D> onCaptured)
     {
-        if (cameraManager == null)
+        // 한 프레임 다 그린 뒤 픽셀 읽기
+        yield return new WaitForEndOfFrame();
+
+        if (centerBox == null)
         {
+            Debug.LogError("[ArCameraCapture] centerBox 가 비어 있습니다.");
             onCaptured?.Invoke(null);
             yield break;
         }
 
-        if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage cpuImage))
-        {
-            onCaptured?.Invoke(null);
-            yield break;
-        }
-
-        var conversionParams = new XRCpuImage.ConversionParams
-        {
-            inputRect = new RectInt(0, 0, cpuImage.width, cpuImage.height),
-            outputDimensions = new Vector2Int(cpuImage.width, cpuImage.height),
-            outputFormat = TextureFormat.RGBA32,
-            transformation = XRCpuImage.Transformation.MirrorX
-        };
-
-        var rawTextureData = new NativeArray<byte>(conversionParams.outputDimensions.x * conversionParams.outputDimensions.y * 4, Allocator.Temp);
-        cpuImage.Convert(conversionParams, rawTextureData);
-        cpuImage.Dispose();
-
-        Texture2D fullTexture = new Texture2D(
-            conversionParams.outputDimensions.x,
-            conversionParams.outputDimensions.y,
-            conversionParams.outputFormat,
-            false
-        );
-        fullTexture.LoadRawTextureData(rawTextureData);
-        fullTexture.Apply();
-        rawTextureData.Dispose();
-
+        // 1) CenterBox 의 월드 코너 4개 얻기
         Vector3[] worldCorners = new Vector3[4];
         centerBox.GetWorldCorners(worldCorners);
+        // [0]=왼쪽 아래, [2]=오른쪽 위
 
-        Vector2 minScreen = RectTransformUtility.WorldToScreenPoint(null, worldCorners[0]);
-        Vector2 maxScreen = RectTransformUtility.WorldToScreenPoint(null, worldCorners[2]);
+        // 2) 화면 좌표로 변환
+        Camera cam = captureCamera;
 
-        float screenWidth = Screen.width;
-        float screenHeight = Screen.height;
+        // Canvas가 Screen Space - Overlay 면 카메라 null 로 처리
+        var canvas = centerBox.GetComponentInParent<Canvas>();
+        if (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+            cam = null;
 
-        int x = Mathf.RoundToInt(minScreen.x / screenWidth * fullTexture.width);
-        int y = Mathf.RoundToInt(minScreen.y / screenHeight * fullTexture.height);
-        int w = Mathf.RoundToInt((maxScreen.x - minScreen.x) / screenWidth * fullTexture.width);
-        int h = Mathf.RoundToInt((maxScreen.y - minScreen.y) / screenHeight * fullTexture.height);
+        Vector3 sp0 = RectTransformUtility.WorldToScreenPoint(cam, worldCorners[0]); // BL
+        Vector3 sp2 = RectTransformUtility.WorldToScreenPoint(cam, worldCorners[2]); // TR
 
-        x = Mathf.Clamp(x, 0, fullTexture.width - 1);
-        y = Mathf.Clamp(y, 0, fullTexture.height - 1);
-        w = Mathf.Clamp(w, 1, fullTexture.width - x);
-        h = Mathf.Clamp(h, 1, fullTexture.height - y);
+        // 혹시 순서가 뒤집혀 있더라도 안전하게 min/max 로 처리
+        float xMin = Mathf.Min(sp0.x, sp2.x);
+        float yMin = Mathf.Min(sp0.y, sp2.y);
+        float width = Mathf.Abs(sp2.x - sp0.x);
+        float height = Mathf.Abs(sp2.y - sp0.y);
 
-        Texture2D cropped = new Texture2D(w, h, TextureFormat.RGBA32, false);
-        Color[] pixels = fullTexture.GetPixels(x, y, w, h);
-        cropped.SetPixels(pixels);
-        cropped.Apply();
+        // 3) 화면 범위 안으로 클램프
+        xMin = Mathf.Clamp(xMin, 0, Screen.width - 1);
+        yMin = Mathf.Clamp(yMin, 0, Screen.height - 1);
 
-        Destroy(fullTexture);
+        if (xMin + width > Screen.width) width = Screen.width - xMin;
+        if (yMin + height > Screen.height) height = Screen.height - yMin;
 
-        onCaptured?.Invoke(cropped);
+        // 너무 작으면 실패로 처리
+        if (width < 10 || height < 10)
+        {
+            Debug.LogWarning($"[ArCameraCapture] 캡쳐 영역이 너무 작습니다. ({width} x {height})");
+            onCaptured?.Invoke(null);
+            yield break;
+        }
+
+        Rect rect = new Rect(xMin, yMin, width, height);
+
+        // 4) 실제 픽셀 캡쳐
+        Texture2D tex = new Texture2D((int)width, (int)height, TextureFormat.RGB24, false);
+        tex.ReadPixels(rect, 0, 0);
+        tex.Apply();
+
+        onCaptured?.Invoke(tex);
     }
 }

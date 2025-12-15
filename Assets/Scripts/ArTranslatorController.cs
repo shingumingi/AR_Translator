@@ -77,6 +77,8 @@ public class ArTranslatorController : MonoBehaviour
             yield break;
         }
 
+        if (resultText != null) resultText.text = $"원문: {recognizedText}\n번역 중...";
+
         // 4) 번역
         if (resultText != null) resultText.text = "번역 중...";
 
