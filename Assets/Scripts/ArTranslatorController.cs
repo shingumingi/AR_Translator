@@ -14,6 +14,7 @@ public class ArTranslatorController : MonoBehaviour
     [Header("UI")]
     public Dropdown languageDropdown;   // 0: 영어, 1: 한국어
     public Text resultText;
+    public Text originText;
 
     bool isBusy = false;
 
@@ -28,6 +29,7 @@ public class ArTranslatorController : MonoBehaviour
     {
         isBusy = true;
         if (resultText != null) resultText.text = "텍스트 인식 중...";
+        if (originText != null) originText.text = "";
 
         // 1) 카메라 캡처 (코루틴 + 콜백)
         Texture2D tex = null;
@@ -77,7 +79,7 @@ public class ArTranslatorController : MonoBehaviour
             yield break;
         }
 
-        if (resultText != null) resultText.text = $"원문: {recognizedText}\n번역 중...";
+        if (originText != null) originText.text = recognizedText;
 
         // 4) 번역
         if (resultText != null) resultText.text = "번역 중...";
